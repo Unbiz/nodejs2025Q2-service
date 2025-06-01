@@ -7,6 +7,8 @@ export interface User {
   updatedAt: number;
 }
 
+export type UserWithoutPassword = Omit<User, 'password'>;
+
 export interface CreateUserDto {
   login: string;
   password: string;
