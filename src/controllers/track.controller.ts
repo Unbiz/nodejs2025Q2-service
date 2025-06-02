@@ -8,10 +8,12 @@ import {
   Body,
   NotFoundException,
   BadRequestException,
+  HttpCode,
 } from '@nestjs/common';
 import { validate as uuidValidate } from 'uuid';
 import { InMemoryDBService } from '../services/in-memory-db.service';
 import { CreateTrackDto } from '../models/track.interface';
+import { StatusCodes } from 'http-status-codes';
 
 @Controller('track')
 export class TrackController {
@@ -93,6 +95,7 @@ export class TrackController {
   }
 
   @Delete(':id')
+  @HttpCode(StatusCodes.NO_CONTENT)
   deleteTrack(@Param('id') id: string) {
     if (!uuidValidate(id)) {
       throw new BadRequestException('Invalid trackId format');

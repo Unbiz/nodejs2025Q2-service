@@ -7,9 +7,11 @@ import {
   NotFoundException,
   BadRequestException,
   UnprocessableEntityException,
+  HttpCode,
 } from '@nestjs/common';
 import { validate as uuidValidate } from 'uuid';
 import { InMemoryDBService } from '../services/in-memory-db.service';
+import { StatusCodes } from 'http-status-codes';
 
 @Controller('favs')
 export class FavoritesController {
@@ -34,6 +36,7 @@ export class FavoritesController {
   }
 
   @Delete('track/:id')
+  @HttpCode(StatusCodes.NO_CONTENT)
   deleteTrackFromFavorites(@Param('id') id: string) {
     if (!uuidValidate(id)) {
       throw new BadRequestException('Invalid trackId format');
@@ -58,6 +61,7 @@ export class FavoritesController {
   }
 
   @Delete('album/:id')
+  @HttpCode(StatusCodes.NO_CONTENT)
   deleteAlbumFromFavorites(@Param('id') id: string) {
     if (!uuidValidate(id)) {
       throw new BadRequestException('Invalid albumId format');
@@ -82,6 +86,7 @@ export class FavoritesController {
   }
 
   @Delete('artist/:id')
+  @HttpCode(StatusCodes.NO_CONTENT)
   deleteArtistFromFavorites(@Param('id') id: string) {
     if (!uuidValidate(id)) {
       throw new BadRequestException('Invalid artistId format');

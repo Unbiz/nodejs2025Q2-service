@@ -14,6 +14,7 @@ import {
 import { validate as uuidValidate } from 'uuid';
 import { InMemoryDBService } from '../services/in-memory-db.service';
 import { CreateUserDto, UpdatePasswordDto } from '../models/user.interface';
+import { StatusCodes } from 'http-status-codes';
 
 @Controller('user')
 export class UserController {
@@ -82,7 +83,7 @@ export class UserController {
   }
 
   @Delete(':id')
-  @HttpCode(204)
+  @HttpCode(StatusCodes.NO_CONTENT)
   deleteUser(@Param('id') id: string) {
     if (!uuidValidate(id)) {
       throw new BadRequestException('Invalid userId format');

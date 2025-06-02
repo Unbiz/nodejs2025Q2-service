@@ -8,10 +8,12 @@ import {
   Body,
   NotFoundException,
   BadRequestException,
+  HttpCode,
 } from '@nestjs/common';
 import { validate as uuidValidate } from 'uuid';
 import { InMemoryDBService } from '../services/in-memory-db.service';
 import { AlbumDto } from '../models/album.interface';
+import { StatusCodes } from 'http-status-codes';
 
 @Controller('album')
 export class AlbumController {
@@ -83,6 +85,7 @@ export class AlbumController {
   }
 
   @Delete(':id')
+  @HttpCode(StatusCodes.NO_CONTENT)
   deleteAlbum(@Param('id') id: string) {
     if (!uuidValidate(id)) {
       throw new BadRequestException('Invalid albumId format');

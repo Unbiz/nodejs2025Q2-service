@@ -8,10 +8,12 @@ import {
   Body,
   NotFoundException,
   BadRequestException,
+  HttpCode,
 } from '@nestjs/common';
 import { validate as uuidValidate } from 'uuid';
 import { InMemoryDBService } from '../services/in-memory-db.service';
 import { ArtistDto } from '../models/artist.interface';
+import { StatusCodes } from 'http-status-codes';
 
 @Controller('artist')
 export class ArtistController {
@@ -55,7 +57,11 @@ export class ArtistController {
       throw new BadRequestException('Invalid artistId format');
     }
 
-    if (!artistDto.name || artistDto.grammy === undefined) {
+    if (
+      typeof artistDto.name !== 'string' ||
+      artistDto.name === '' ||
+      typeof artistDto.grammy !== 'boolean'
+    ) {
       throw new BadRequestException('Missing required fields');
     }
 
@@ -73,6 +79,7 @@ export class ArtistController {
   }
 
   @Delete(':id')
+  @HttpCode(StatusCodes.NO_CONTENT)
   deleteArtist(@Param('id') id: string) {
     if (!uuidValidate(id)) {
       throw new BadRequestException('Invalid artistId format');
