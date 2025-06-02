@@ -42,7 +42,12 @@ export class UserController {
 
   @Post()
   createUser(@Body() createUserDto: CreateUserDto) {
-    if (!createUserDto.login || !createUserDto.password) {
+    if (
+      typeof createUserDto.login !== 'string' ||
+      createUserDto.login === '' ||
+      typeof createUserDto.password !== 'string' ||
+      createUserDto.password === ''
+    ) {
       throw new BadRequestException('Missing required fields');
     }
 
