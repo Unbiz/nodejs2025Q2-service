@@ -1,10 +1,19 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { InMemoryDBService } from './services/in-memory-db.service';
+import { UserController } from './controllers/user.controller';
+import { ArtistController } from './controllers/artist.controller';
+import { AlbumController } from './controllers/album.controller';
+import { TrackController } from './controllers/track.controller';
+import { FavoritesController } from './controllers/favorites.controller';
 
 @Module({
-  imports: [],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [
+    UserController,
+    ArtistController,
+    AlbumController,
+    TrackController,
+    FavoritesController,
+  ],
+  providers: [InMemoryDBService],
 })
 export class AppModule {}
