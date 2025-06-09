@@ -9,23 +9,23 @@ import {
   HttpCode,
   ParseUUIDPipe,
 } from '@nestjs/common';
-import { InMemoryDBService } from '../services/in-memory-db.service';
+import { FavoritesService } from '../services/favorites.service';
 import { StatusCodes } from 'http-status-codes';
 
 @Controller('favs')
 export class FavoritesController {
-  constructor(private inMemoryDBService: InMemoryDBService) {}
+  constructor(private favoritesService: FavoritesService) {}
 
   @Get()
   getFavorites() {
-    return this.inMemoryDBService.getFavorites();
+    return this.favoritesService.getFavorites();
   }
 
   @Post('track/:id')
   addTrackToFavorites(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
   ) {
-    const result = this.inMemoryDBService.addTrackToFavorites(id);
+    const result = this.favoritesService.addTrackToFavorites(id);
 
     if (!result) {
       throw new UnprocessableEntityException('Track does not exist');
@@ -37,7 +37,7 @@ export class FavoritesController {
   deleteTrackFromFavorites(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
   ) {
-    if (!this.inMemoryDBService.removeTrackFromFavorites(id)) {
+    if (!this.favoritesService.removeTrackFromFavorites(id)) {
       throw new NotFoundException('Track is not in favorites');
     }
   }
@@ -46,7 +46,7 @@ export class FavoritesController {
   addAlbumToFavorites(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
   ) {
-    const result = this.inMemoryDBService.addAlbumToFavorites(id);
+    const result = this.favoritesService.addAlbumToFavorites(id);
 
     if (!result) {
       throw new UnprocessableEntityException('Album does not exist');
@@ -58,7 +58,7 @@ export class FavoritesController {
   deleteAlbumFromFavorites(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
   ) {
-    if (!this.inMemoryDBService.removeAlbumFromFavorites(id)) {
+    if (!this.favoritesService.removeAlbumFromFavorites(id)) {
       throw new NotFoundException('Album is not in favorites');
     }
   }
@@ -67,7 +67,7 @@ export class FavoritesController {
   addArtistToFavorites(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
   ) {
-    const result = this.inMemoryDBService.addArtistToFavorites(id);
+    const result = this.favoritesService.addArtistToFavorites(id);
 
     if (!result) {
       throw new UnprocessableEntityException('Artist does not exist');
@@ -79,7 +79,7 @@ export class FavoritesController {
   deleteArtistFromFavorites(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
   ) {
-    if (!this.inMemoryDBService.removeArtistFromFavorites(id)) {
+    if (!this.favoritesService.removeArtistFromFavorites(id)) {
       throw new NotFoundException('Artist is not in favorites');
     }
   }

@@ -11,22 +11,22 @@ import {
   HttpCode,
   ParseUUIDPipe,
 } from '@nestjs/common';
-import { InMemoryDBService } from '../services/in-memory-db.service';
+import { TrackService } from '../services/track.service';
 import { CreateTrackDto } from '../models/track.interface';
 import { StatusCodes } from 'http-status-codes';
 
 @Controller('track')
 export class TrackController {
-  constructor(private inMemoryDBService: InMemoryDBService) {}
+  constructor(private trackService: TrackService) {}
 
   @Get()
   getAllTracks() {
-    return this.inMemoryDBService.getAllTracks();
+    return this.trackService.getAllTracks();
   }
 
   @Get(':id')
   getTrackById(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
-    const track = this.inMemoryDBService.getTrackById(id);
+    const track = this.trackService.getTrackById(id);
 
     if (!track) {
       throw new NotFoundException('Track not found');
@@ -41,7 +41,7 @@ export class TrackController {
       throw new BadRequestException('Missing required fields');
     }
 
-    return this.inMemoryDBService.createTrack(
+    return this.trackService.createTrack(
       trackDto.name,
       trackDto.artistId || null,
       trackDto.albumId || null,
@@ -58,7 +58,7 @@ export class TrackController {
       throw new BadRequestException('Missing required fields');
     }
 
-    const track = this.inMemoryDBService.updateTrack(
+    const track = this.trackService.updateTrack(
       id,
       trackDto.name,
       trackDto.artistId || null,
@@ -76,7 +76,7 @@ export class TrackController {
   @Delete(':id')
   @HttpCode(StatusCodes.NO_CONTENT)
   deleteTrack(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
-    if (!this.inMemoryDBService.deleteTrack(id)) {
+    if (!this.trackService.deleteTrack(id)) {
       throw new NotFoundException('Track not found');
     }
   }

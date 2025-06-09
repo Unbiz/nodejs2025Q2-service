@@ -11,22 +11,22 @@ import {
   HttpCode,
   ParseUUIDPipe,
 } from '@nestjs/common';
-import { InMemoryDBService } from '../services/in-memory-db.service';
 import { ArtistDto } from '../models/artist.interface';
 import { StatusCodes } from 'http-status-codes';
+import { ArtistService } from '../services/artist.service';
 
 @Controller('artist')
 export class ArtistController {
-  constructor(private inMemoryDBService: InMemoryDBService) {}
+  constructor(private artistService: ArtistService) {}
 
   @Get()
   getAllArtists() {
-    return this.inMemoryDBService.getAllArtists();
+    return this.artistService.getAllArtists();
   }
 
   @Get(':id')
   getArtistById(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
-    const artist = this.inMemoryDBService.getArtistById(id);
+    const artist = this.artistService.getArtistById(id);
 
     if (!artist) {
       throw new NotFoundException('Artist not found');
@@ -41,10 +41,7 @@ export class ArtistController {
       throw new BadRequestException('Missing required fields');
     }
 
-    return this.inMemoryDBService.createArtist(
-      artistDto.name,
-      artistDto.grammy,
-    );
+    return this.artistService.createArtist(artistDto.name, artistDto.grammy);
   }
 
   @Put(':id')
@@ -60,7 +57,7 @@ export class ArtistController {
       throw new BadRequestException('Missing required fields');
     }
 
-    const artist = this.inMemoryDBService.updateArtist(
+    const artist = this.artistService.updateArtist(
       id,
       artistDto.name,
       artistDto.grammy,
@@ -76,7 +73,7 @@ export class ArtistController {
   @Delete(':id')
   @HttpCode(StatusCodes.NO_CONTENT)
   deleteArtist(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
-    if (!this.inMemoryDBService.deleteArtist(id)) {
+    if (!this.artistService.deleteArtist(id)) {
       throw new NotFoundException('Artist not found');
     }
   }
