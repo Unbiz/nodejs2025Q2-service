@@ -10,8 +10,8 @@ import {
   ForbiddenException,
   NotFoundException,
   BadRequestException,
+  ParseUUIDPipe,
 } from '@nestjs/common';
-import { validate as uuidValidate } from 'uuid';
 import { InMemoryDBService } from '../services/in-memory-db.service';
 import { CreateUserDto, UpdatePasswordDto } from '../models/user.interface';
 import { StatusCodes } from 'http-status-codes';
@@ -26,11 +26,7 @@ export class UserController {
   }
 
   @Get(':id')
-  getUserById(@Param('id') id: string) {
-    if (!uuidValidate(id)) {
-      throw new BadRequestException('Invalid userId format');
-    }
-
+  getUserById(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
     const user = this.inMemoryDBService.getUserById(id);
 
     if (!user) {
@@ -59,13 +55,9 @@ export class UserController {
 
   @Put(':id')
   updatePassword(
-    @Param('id') id: string,
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
     @Body() updatePasswordDto: UpdatePasswordDto,
   ) {
-    if (!uuidValidate(id)) {
-      throw new BadRequestException('Invalid userId format');
-    }
-
     if (!updatePasswordDto.oldPassword || !updatePasswordDto.newPassword) {
       throw new BadRequestException('Missing required fields');
     }
@@ -89,11 +81,7 @@ export class UserController {
 
   @Delete(':id')
   @HttpCode(StatusCodes.NO_CONTENT)
-  deleteUser(@Param('id') id: string) {
-    if (!uuidValidate(id)) {
-      throw new BadRequestException('Invalid userId format');
-    }
-
+  deleteUser(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
     if (!this.inMemoryDBService.deleteUser(id)) {
       throw new NotFoundException('User not found');
     }

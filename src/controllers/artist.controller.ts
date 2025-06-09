@@ -9,8 +9,8 @@ import {
   NotFoundException,
   BadRequestException,
   HttpCode,
+  ParseUUIDPipe,
 } from '@nestjs/common';
-import { validate as uuidValidate } from 'uuid';
 import { InMemoryDBService } from '../services/in-memory-db.service';
 import { ArtistDto } from '../models/artist.interface';
 import { StatusCodes } from 'http-status-codes';
@@ -25,11 +25,7 @@ export class ArtistController {
   }
 
   @Get(':id')
-  getArtistById(@Param('id') id: string) {
-    if (!uuidValidate(id)) {
-      throw new BadRequestException('Invalid artistId format');
-    }
-
+  getArtistById(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
     const artist = this.inMemoryDBService.getArtistById(id);
 
     if (!artist) {
@@ -52,11 +48,10 @@ export class ArtistController {
   }
 
   @Put(':id')
-  updateArtist(@Param('id') id: string, @Body() artistDto: ArtistDto) {
-    if (!uuidValidate(id)) {
-      throw new BadRequestException('Invalid artistId format');
-    }
-
+  updateArtist(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+    @Body() artistDto: ArtistDto,
+  ) {
     if (
       typeof artistDto.name !== 'string' ||
       artistDto.name === '' ||
@@ -80,11 +75,7 @@ export class ArtistController {
 
   @Delete(':id')
   @HttpCode(StatusCodes.NO_CONTENT)
-  deleteArtist(@Param('id') id: string) {
-    if (!uuidValidate(id)) {
-      throw new BadRequestException('Invalid artistId format');
-    }
-
+  deleteArtist(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
     if (!this.inMemoryDBService.deleteArtist(id)) {
       throw new NotFoundException('Artist not found');
     }

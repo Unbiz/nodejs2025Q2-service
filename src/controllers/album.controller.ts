@@ -9,6 +9,7 @@ import {
   NotFoundException,
   BadRequestException,
   HttpCode,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { validate as uuidValidate } from 'uuid';
 import { InMemoryDBService } from '../services/in-memory-db.service';
@@ -25,11 +26,7 @@ export class AlbumController {
   }
 
   @Get(':id')
-  getAlbumById(@Param('id') id: string) {
-    if (!uuidValidate(id)) {
-      throw new BadRequestException('Invalid albumId format');
-    }
-
+  getAlbumById(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
     const album = this.inMemoryDBService.getAlbumById(id);
 
     if (!album) {
@@ -45,10 +42,6 @@ export class AlbumController {
       throw new BadRequestException('Missing required fields');
     }
 
-    if (albumDto.artistId && !uuidValidate(albumDto.artistId)) {
-      throw new BadRequestException('Invalid artistId format');
-    }
-
     return this.inMemoryDBService.createAlbum(
       albumDto.name,
       albumDto.year,
@@ -57,11 +50,10 @@ export class AlbumController {
   }
 
   @Put(':id')
-  updateAlbum(@Param('id') id: string, @Body() albumDto: AlbumDto) {
-    if (!uuidValidate(id)) {
-      throw new BadRequestException('Invalid albumId format');
-    }
-
+  updateAlbum(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+    @Body() albumDto: AlbumDto,
+  ) {
     if (!albumDto.name || albumDto.year === undefined) {
       throw new BadRequestException('Missing required fields');
     }
@@ -86,11 +78,7 @@ export class AlbumController {
 
   @Delete(':id')
   @HttpCode(StatusCodes.NO_CONTENT)
-  deleteAlbum(@Param('id') id: string) {
-    if (!uuidValidate(id)) {
-      throw new BadRequestException('Invalid albumId format');
-    }
-
+  deleteAlbum(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
     if (!this.inMemoryDBService.deleteAlbum(id)) {
       throw new NotFoundException('Album not found');
     }

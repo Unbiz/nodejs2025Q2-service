@@ -5,11 +5,10 @@ import {
   Delete,
   Param,
   NotFoundException,
-  BadRequestException,
   UnprocessableEntityException,
   HttpCode,
+  ParseUUIDPipe,
 } from '@nestjs/common';
-import { validate as uuidValidate } from 'uuid';
 import { InMemoryDBService } from '../services/in-memory-db.service';
 import { StatusCodes } from 'http-status-codes';
 
@@ -23,11 +22,9 @@ export class FavoritesController {
   }
 
   @Post('track/:id')
-  addTrackToFavorites(@Param('id') id: string) {
-    if (!uuidValidate(id)) {
-      throw new BadRequestException('Invalid trackId format');
-    }
-
+  addTrackToFavorites(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ) {
     const result = this.inMemoryDBService.addTrackToFavorites(id);
 
     if (!result) {
@@ -37,22 +34,18 @@ export class FavoritesController {
 
   @Delete('track/:id')
   @HttpCode(StatusCodes.NO_CONTENT)
-  deleteTrackFromFavorites(@Param('id') id: string) {
-    if (!uuidValidate(id)) {
-      throw new BadRequestException('Invalid trackId format');
-    }
-
+  deleteTrackFromFavorites(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ) {
     if (!this.inMemoryDBService.removeTrackFromFavorites(id)) {
       throw new NotFoundException('Track is not in favorites');
     }
   }
 
   @Post('album/:id')
-  addAlbumToFavorites(@Param('id') id: string) {
-    if (!uuidValidate(id)) {
-      throw new BadRequestException('Invalid albumId format');
-    }
-
+  addAlbumToFavorites(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ) {
     const result = this.inMemoryDBService.addAlbumToFavorites(id);
 
     if (!result) {
@@ -62,22 +55,18 @@ export class FavoritesController {
 
   @Delete('album/:id')
   @HttpCode(StatusCodes.NO_CONTENT)
-  deleteAlbumFromFavorites(@Param('id') id: string) {
-    if (!uuidValidate(id)) {
-      throw new BadRequestException('Invalid albumId format');
-    }
-
+  deleteAlbumFromFavorites(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ) {
     if (!this.inMemoryDBService.removeAlbumFromFavorites(id)) {
       throw new NotFoundException('Album is not in favorites');
     }
   }
 
   @Post('artist/:id')
-  addArtistToFavorites(@Param('id') id: string) {
-    if (!uuidValidate(id)) {
-      throw new BadRequestException('Invalid artistId format');
-    }
-
+  addArtistToFavorites(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ) {
     const result = this.inMemoryDBService.addArtistToFavorites(id);
 
     if (!result) {
@@ -87,11 +76,9 @@ export class FavoritesController {
 
   @Delete('artist/:id')
   @HttpCode(StatusCodes.NO_CONTENT)
-  deleteArtistFromFavorites(@Param('id') id: string) {
-    if (!uuidValidate(id)) {
-      throw new BadRequestException('Invalid artistId format');
-    }
-
+  deleteArtistFromFavorites(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ) {
     if (!this.inMemoryDBService.removeArtistFromFavorites(id)) {
       throw new NotFoundException('Artist is not in favorites');
     }
