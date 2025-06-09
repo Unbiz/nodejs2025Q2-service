@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { Album } from '../models/album.interface';
-import { Artist } from '../models/artist.interface';
-import { Track } from '../models/track.interface';
-import { User } from '../models/user.interface';
-import { Favorites } from '../models/favorites.interface';
+import { Album } from '../models/entities/album.entity';
+import { Artist } from '../models/entities/artist.entity';
+import { Track } from '../models/entities/track.entity';
+import { User } from '../models/entities/user.entity';
+import { Favorites } from '../models/entities/favorites.entity';
 
 @Injectable()
 export class StorageService {

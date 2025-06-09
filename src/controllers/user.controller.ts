@@ -12,7 +12,7 @@ import {
   BadRequestException,
   ParseUUIDPipe,
 } from '@nestjs/common';
-import { CreateUserDto, UpdatePasswordDto } from '../models/user.interface';
+import { CreateUserDto, UpdatePasswordDto } from '../models/dto/user.dto';
 import { StatusCodes } from 'http-status-codes';
 import { UserService } from '../services/user.service';
 
@@ -38,15 +38,6 @@ export class UserController {
 
   @Post()
   createUser(@Body() createUserDto: CreateUserDto) {
-    if (
-      typeof createUserDto.login !== 'string' ||
-      createUserDto.login === '' ||
-      typeof createUserDto.password !== 'string' ||
-      createUserDto.password === ''
-    ) {
-      throw new BadRequestException('Missing required fields');
-    }
-
     return this.userService.createUser(
       createUserDto.login,
       createUserDto.password,
@@ -58,10 +49,6 @@ export class UserController {
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
     @Body() updatePasswordDto: UpdatePasswordDto,
   ) {
-    if (!updatePasswordDto.oldPassword || !updatePasswordDto.newPassword) {
-      throw new BadRequestException('Missing required fields');
-    }
-
     const user = this.userService.updateUserPassword(
       id,
       updatePasswordDto.oldPassword,

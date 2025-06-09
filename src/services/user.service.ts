@@ -1,20 +1,21 @@
 import { Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-import { User, UserWithoutPassword } from '../models/user.interface';
+import { User } from '../models/entities/user.entity';
+import { UserResponse } from '../models/dto/user.dto';
 import { StorageService } from './storage.service';
 
 @Injectable()
 export class UserService {
   constructor(private storageService: StorageService) {}
 
-  getAllUsers(): UserWithoutPassword[] {
+  getAllUsers(): UserResponse[] {
     return Array.from(this.storageService.getUsers().values()).map((user) => {
       const userWithoutPassword = this.getUserWithoutPassword(user);
       return userWithoutPassword;
     });
   }
 
-  getUserById(id: string): UserWithoutPassword | null {
+  getUserById(id: string): UserResponse | null {
     const user = this.storageService.getUsers().get(id);
 
     if (user == null) {
@@ -25,7 +26,7 @@ export class UserService {
     return userWithoutPassword;
   }
 
-  createUser(login: string, password: string): UserWithoutPassword {
+  createUser(login: string, password: string): UserResponse {
     const id = randomUUID();
     const timestamp = Date.now();
     const user: User = {
@@ -46,7 +47,7 @@ export class UserService {
     id: string,
     oldPassword: string,
     newPassword: string,
-  ): UserWithoutPassword | null | undefined {
+  ): UserResponse | null | undefined {
     const user = this.storageService.getUsers().get(id);
 
     if (user === undefined) {
@@ -73,7 +74,7 @@ export class UserService {
     return this.storageService.getUsers().delete(id);
   }
 
-  private getUserWithoutPassword(user: User): UserWithoutPassword {
+  private getUserWithoutPassword(user: User): UserResponse {
     return {
       id: user.id,
       login: user.login,

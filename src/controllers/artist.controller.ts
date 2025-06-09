@@ -11,7 +11,7 @@ import {
   HttpCode,
   ParseUUIDPipe,
 } from '@nestjs/common';
-import { ArtistDto } from '../models/artist.interface';
+import { CreateArtistDto } from '../models/dto/artist.dto';
 import { StatusCodes } from 'http-status-codes';
 import { ArtistService } from '../services/artist.service';
 
@@ -36,27 +36,15 @@ export class ArtistController {
   }
 
   @Post()
-  createArtist(@Body() artistDto: ArtistDto) {
-    if (!artistDto.name || artistDto.grammy === undefined) {
-      throw new BadRequestException('Missing required fields');
-    }
-
+  createArtist(@Body() artistDto: CreateArtistDto) {
     return this.artistService.createArtist(artistDto.name, artistDto.grammy);
   }
 
   @Put(':id')
   updateArtist(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
-    @Body() artistDto: ArtistDto,
+    @Body() artistDto: CreateArtistDto,
   ) {
-    if (
-      typeof artistDto.name !== 'string' ||
-      artistDto.name === '' ||
-      typeof artistDto.grammy !== 'boolean'
-    ) {
-      throw new BadRequestException('Missing required fields');
-    }
-
     const artist = this.artistService.updateArtist(
       id,
       artistDto.name,

@@ -12,7 +12,7 @@ import {
   ParseUUIDPipe,
 } from '@nestjs/common';
 import { TrackService } from '../services/track.service';
-import { CreateTrackDto } from '../models/track.interface';
+import { CreateTrackDto } from '../models/dto/track.dto';
 import { StatusCodes } from 'http-status-codes';
 
 @Controller('track')
@@ -37,10 +37,6 @@ export class TrackController {
 
   @Post()
   createTrack(@Body() trackDto: CreateTrackDto) {
-    if (!trackDto.name || trackDto.duration === undefined) {
-      throw new BadRequestException('Missing required fields');
-    }
-
     return this.trackService.createTrack(
       trackDto.name,
       trackDto.artistId || null,
@@ -54,10 +50,6 @@ export class TrackController {
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
     @Body() trackDto: CreateTrackDto,
   ) {
-    if (!trackDto.name || trackDto.duration === undefined) {
-      throw new BadRequestException('Missing required fields');
-    }
-
     const track = this.trackService.updateTrack(
       id,
       trackDto.name,

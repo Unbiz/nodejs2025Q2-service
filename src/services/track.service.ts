@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-import { Track } from '../models/track.interface';
+import { Track } from '../models/entities/track.entity';
 import { StorageService } from './storage.service';
 
 @Injectable()

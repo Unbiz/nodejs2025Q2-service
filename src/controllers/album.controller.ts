@@ -7,13 +7,11 @@ import {
   Param,
   Body,
   NotFoundException,
-  BadRequestException,
   HttpCode,
   ParseUUIDPipe,
 } from '@nestjs/common';
-import { validate as uuidValidate } from 'uuid';
 import { AlbumService } from '../services/album.service';
-import { AlbumDto } from '../models/album.interface';
+import { CreateAlbumDto } from '../models/dto/album.dto';
 import { StatusCodes } from 'http-status-codes';
 
 @Controller('album')
@@ -37,11 +35,7 @@ export class AlbumController {
   }
 
   @Post()
-  createAlbum(@Body() albumDto: AlbumDto) {
-    if (!albumDto.name || albumDto.year === undefined) {
-      throw new BadRequestException('Missing required fields');
-    }
-
+  createAlbum(@Body() albumDto: CreateAlbumDto) {
     return this.albumService.createAlbum(
       albumDto.name,
       albumDto.year,
@@ -52,16 +46,8 @@ export class AlbumController {
   @Put(':id')
   updateAlbum(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
-    @Body() albumDto: AlbumDto,
+    @Body() albumDto: CreateAlbumDto,
   ) {
-    if (!albumDto.name || albumDto.year === undefined) {
-      throw new BadRequestException('Missing required fields');
-    }
-
-    if (albumDto.artistId && !uuidValidate(albumDto.artistId)) {
-      throw new BadRequestException('Invalid artistId format');
-    }
-
     const album = this.albumService.updateAlbum(
       id,
       albumDto.name,

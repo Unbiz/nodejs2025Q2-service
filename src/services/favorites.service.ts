@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { Favorites } from '../models/entities/favorites.entity';
 import { StorageService } from './storage.service';
 
 @Injectable()

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-import { Album } from '../models/album.interface';
+import { Album } from '../models/entities/album.entity';
 import { StorageService } from './storage.service';
 
 @Injectable()
