@@ -1,31 +1,24 @@
 import { Module } from '@nestjs/common';
-import { UserController } from './controllers/user.controller';
-import { ArtistController } from './controllers/artist.controller';
-import { AlbumController } from './controllers/album.controller';
-import { TrackController } from './controllers/track.controller';
-import { FavoritesController } from './controllers/favorites.controller';
-import { StorageService } from './services/storage.service';
-import { UserService } from './services/user.service';
-import { ArtistService } from './services/artist.service';
-import { AlbumService } from './services/album.service';
-import { TrackService } from './services/track.service';
-import { FavoritesService } from './services/favorites.service';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { typeOrmConfig } from './config/typeorm.config';
+import { AlbumModule } from './modules/album.module';
+import { ArtistModule } from './modules/artist.module';
+import { TrackModule } from './modules/track.module';
+import { UserModule } from './modules/user.module';
+import { FavoritesModule } from './modules/favorites.module';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
 
 @Module({
-  controllers: [
-    UserController,
-    ArtistController,
-    AlbumController,
-    TrackController,
-    FavoritesController,
+  imports: [
+    TypeOrmModule.forRoot(typeOrmConfig),
+    AlbumModule,
+    ArtistModule,
+    TrackModule,
+    UserModule,
+    FavoritesModule,
   ],
-  providers: [
-    StorageService,
-    UserService,
-    ArtistService,
-    AlbumService,
-    TrackService,
-    FavoritesService,
-  ],
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule {}

@@ -7,7 +7,6 @@ import {
   Param,
   Body,
   NotFoundException,
-  BadRequestException,
   HttpCode,
   ParseUUIDPipe,
 } from '@nestjs/common';
@@ -20,13 +19,32 @@ export class ArtistController {
   constructor(private artistService: ArtistService) {}
 
   @Get()
-  getAllArtists() {
+  async getAllArtists() {
     return this.artistService.getAllArtists();
   }
 
   @Get(':id')
-  getArtistById(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
-    const artist = this.artistService.getArtistById(id);
+  async getArtistById(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ) {
+    return this.artistService.getArtistById(id);
+  }
+
+  @Post()
+  async createArtist(@Body() artistDto: CreateArtistDto) {
+    return this.artistService.createArtist(artistDto.name, artistDto.grammy);
+  }
+
+  @Put(':id')
+  async updateArtist(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+    @Body() artistDto: CreateArtistDto,
+  ) {
+    const artist = await this.artistService.updateArtist(
+      id,
+      artistDto.name,
+      artistDto.grammy,
+    );
 
     if (!artist) {
       throw new NotFoundException('Artist not found');
@@ -35,33 +53,14 @@ export class ArtistController {
     return artist;
   }
 
-  @Post()
-  createArtist(@Body() artistDto: CreateArtistDto) {
-    return this.artistService.createArtist(artistDto.name, artistDto.grammy);
-  }
-
-  @Put(':id')
-  updateArtist(
-    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
-    @Body() artistDto: CreateArtistDto,
-  ) {
-    const artist = this.artistService.updateArtist(
-      id,
-      artistDto.name,
-      artistDto.grammy,
-    );
-
-    if (artist == null) {
-      throw new NotFoundException('Artist not found');
-    }
-
-    return artist;
-  }
-
   @Delete(':id')
   @HttpCode(StatusCodes.NO_CONTENT)
-  deleteArtist(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
-    if (!this.artistService.deleteArtist(id)) {
+  async deleteArtist(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ) {
+    const result = await this.artistService.deleteArtist(id);
+
+    if (!result) {
       throw new NotFoundException('Artist not found');
     }
   }

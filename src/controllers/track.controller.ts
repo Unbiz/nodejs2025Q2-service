@@ -7,7 +7,6 @@ import {
   Param,
   Body,
   NotFoundException,
-  BadRequestException,
   HttpCode,
   ParseUUIDPipe,
 } from '@nestjs/common';
@@ -20,23 +19,19 @@ export class TrackController {
   constructor(private trackService: TrackService) {}
 
   @Get()
-  getAllTracks() {
+  async getAllTracks() {
     return this.trackService.getAllTracks();
   }
 
   @Get(':id')
-  getTrackById(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
-    const track = this.trackService.getTrackById(id);
-
-    if (!track) {
-      throw new NotFoundException('Track not found');
-    }
-
-    return track;
+  async getTrackById(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ) {
+    return this.trackService.getTrackById(id);
   }
 
   @Post()
-  createTrack(@Body() trackDto: CreateTrackDto) {
+  async createTrack(@Body() trackDto: CreateTrackDto) {
     return this.trackService.createTrack(
       trackDto.name,
       trackDto.artistId || null,
@@ -46,11 +41,11 @@ export class TrackController {
   }
 
   @Put(':id')
-  updateTrack(
+  async updateTrack(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
     @Body() trackDto: CreateTrackDto,
   ) {
-    const track = this.trackService.updateTrack(
+    const track = await this.trackService.updateTrack(
       id,
       trackDto.name,
       trackDto.artistId || null,
@@ -58,7 +53,7 @@ export class TrackController {
       trackDto.duration,
     );
 
-    if (track == null) {
+    if (!track) {
       throw new NotFoundException('Track not found');
     }
 
@@ -67,8 +62,12 @@ export class TrackController {
 
   @Delete(':id')
   @HttpCode(StatusCodes.NO_CONTENT)
-  deleteTrack(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
-    if (!this.trackService.deleteTrack(id)) {
+  async deleteTrack(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ) {
+    const result = await this.trackService.deleteTrack(id);
+
+    if (!result) {
       throw new NotFoundException('Track not found');
     }
   }

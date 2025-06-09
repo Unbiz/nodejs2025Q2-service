@@ -19,23 +19,19 @@ export class AlbumController {
   constructor(private albumService: AlbumService) {}
 
   @Get()
-  getAllAlbums() {
+  async getAllAlbums() {
     return this.albumService.getAllAlbums();
   }
 
   @Get(':id')
-  getAlbumById(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
-    const album = this.albumService.getAlbumById(id);
-
-    if (!album) {
-      throw new NotFoundException('Album not found');
-    }
-
-    return album;
+  async getAlbumById(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ) {
+    return this.albumService.getAlbumById(id);
   }
 
   @Post()
-  createAlbum(@Body() albumDto: CreateAlbumDto) {
+  async createAlbum(@Body() albumDto: CreateAlbumDto) {
     return this.albumService.createAlbum(
       albumDto.name,
       albumDto.year,
@@ -44,18 +40,18 @@ export class AlbumController {
   }
 
   @Put(':id')
-  updateAlbum(
+  async updateAlbum(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
     @Body() albumDto: CreateAlbumDto,
   ) {
-    const album = this.albumService.updateAlbum(
+    const album = await this.albumService.updateAlbum(
       id,
       albumDto.name,
       albumDto.year,
       albumDto.artistId || null,
     );
 
-    if (album == null) {
+    if (!album) {
       throw new NotFoundException('Album not found');
     }
 
@@ -64,8 +60,11 @@ export class AlbumController {
 
   @Delete(':id')
   @HttpCode(StatusCodes.NO_CONTENT)
-  deleteAlbum(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
-    if (!this.albumService.deleteAlbum(id)) {
+  async deleteAlbum(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ) {
+    const result = await this.albumService.deleteAlbum(id);
+    if (!result) {
       throw new NotFoundException('Album not found');
     }
   }

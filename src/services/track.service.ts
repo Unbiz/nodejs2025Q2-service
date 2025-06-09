@@ -1,61 +1,82 @@
-import { Injectable } from '@nestjs/common';
-import { randomUUID } from 'crypto';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { Track } from '../models/entities/track.entity';
-import { StorageService } from './storage.service';
+import { Favorites } from '../models/entities/favorites.entity';
 
 @Injectable()
 export class TrackService {
-  constructor(private storageService: StorageService) {}
+  constructor(
+    @InjectRepository(Track)
+    private trackRepository: Repository<Track>,
+    @InjectRepository(Favorites)
+    private favoritesRepository: Repository<Favorites>,
+  ) {}
 
-  getAllTracks(): Track[] {
-    return Array.from(this.storageService.getTracks().values());
+  async getAllTracks(): Promise<Track[]> {
+    return this.trackRepository.find();
   }
 
-  getTrackById(id: string): Track | undefined {
-    return this.storageService.getTracks().get(id);
-  }
+  async getTrackById(id: string): Promise<Track> {
+    const track = await this.trackRepository.findOne({ where: { id } });
 
-  createTrack(
-    name: string,
-    artistId: string | null,
-    albumId: string | null,
-    duration: number,
-  ): Track {
-    const id = randomUUID();
-    const track: Track = { id, name, artistId, albumId, duration };
-    this.storageService.getTracks().set(id, track);
+    if (!track) {
+      throw new NotFoundException(`Track with id ${id} not found`);
+    }
 
     return track;
   }
 
-  updateTrack(
+  async createTrack(
+    name: string,
+    artistId: string | null,
+    albumId: string | null,
+    duration: number,
+  ): Promise<Track> {
+    const track = this.trackRepository.create({
+      name,
+      artistId,
+      albumId,
+      duration,
+    });
+
+    return this.trackRepository.save(track);
+  }
+
+  async updateTrack(
     id: string,
     name: string,
     artistId: string | null,
     albumId: string | null,
     duration: number,
-  ): Track | null {
-    const tracks = this.storageService.getTracks();
-    if (!tracks.has(id)) {
+  ): Promise<Track | null> {
+    const track = await this.trackRepository.findOne({ where: { id } });
+
+    if (!track) {
       return null;
     }
 
-    const track: Track = { id, name, artistId, albumId, duration };
-    tracks.set(id, track);
+    Object.assign(track, { name, artistId, albumId, duration });
 
-    return track;
+    return this.trackRepository.save(track);
   }
 
-  deleteTrack(id: string): boolean {
-    const tracks = this.storageService.getTracks();
-    const favorites = this.storageService.getFavorites();
+  async deleteTrack(id: string): Promise<boolean> {
+    const track = await this.trackRepository.findOne({ where: { id } });
 
-    if (tracks.delete(id)) {
-      favorites.tracks = favorites.tracks.filter((trackId) => trackId !== id);
-
-      return true;
+    if (!track) {
+      return false;
     }
 
-    return false;
+    const favorites = await this.favoritesRepository.find();
+
+    for (const favorite of favorites) {
+      favorite.tracks = favorite.tracks.filter((trackId) => trackId !== id);
+      await this.favoritesRepository.save(favorite);
+    }
+
+    await this.trackRepository.remove(track);
+
+    return true;
   }
 }

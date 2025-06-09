@@ -1,65 +1,74 @@
-import { Injectable } from '@nestjs/common';
-import { randomUUID } from 'crypto';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { Artist } from '../models/entities/artist.entity';
-import { StorageService } from './storage.service';
+import { Track } from '../models/entities/track.entity';
+import { Favorites } from '../models/entities/favorites.entity';
 
 @Injectable()
 export class ArtistService {
-  constructor(private storageService: StorageService) {}
+  constructor(
+    @InjectRepository(Artist)
+    private artistRepository: Repository<Artist>,
+    @InjectRepository(Track)
+    private trackRepository: Repository<Track>,
+    @InjectRepository(Favorites)
+    private favoritesRepository: Repository<Favorites>,
+  ) {}
 
-  getAllArtists(): Artist[] {
-    return Array.from(this.storageService.getArtists().values());
+  async getAllArtists(): Promise<Artist[]> {
+    return this.artistRepository.find();
   }
 
-  getArtistById(id: string): Artist | undefined {
-    return this.storageService.getArtists().get(id);
-  }
+  async getArtistById(id: string): Promise<Artist> {
+    const artist = await this.artistRepository.findOne({ where: { id } });
 
-  createArtist(name: string, grammy: boolean): Artist {
-    const id = randomUUID();
-    const artist: Artist = { id, name, grammy };
-    this.storageService.getArtists().set(id, artist);
+    if (!artist) {
+      throw new NotFoundException(`Artist with id ${id} not found`);
+    }
 
     return artist;
   }
 
-  updateArtist(id: string, name: string, grammy: boolean): Artist | null {
-    if (!this.storageService.getArtists().has(id)) {
+  async createArtist(name: string, grammy: boolean): Promise<Artist> {
+    const artist = this.artistRepository.create({ name, grammy });
+
+    return this.artistRepository.save(artist);
+  }
+
+  async updateArtist(
+    id: string,
+    name: string,
+    grammy: boolean,
+  ): Promise<Artist | null> {
+    const artist = await this.artistRepository.findOne({ where: { id } });
+
+    if (!artist) {
       return null;
     }
 
-    const artist: Artist = { id, name, grammy };
-    this.storageService.getArtists().set(id, artist);
+    Object.assign(artist, { name, grammy });
 
-    return artist;
+    return this.artistRepository.save(artist);
   }
 
-  deleteArtist(id: string): boolean {
-    const artists = this.storageService.getArtists();
-    const albums = this.storageService.getAlbums();
-    const tracks = this.storageService.getTracks();
-    const favorites = this.storageService.getFavorites();
+  async deleteArtist(id: string): Promise<boolean> {
+    const artist = await this.artistRepository.findOne({ where: { id } });
 
-    if (artists.delete(id)) {
-      favorites.artists = favorites.artists.filter(
-        (artistId) => artistId !== id,
-      );
-
-      for (const [albumId, album] of albums.entries()) {
-        if (album.artistId === id) {
-          albums.set(albumId, { ...album, artistId: null });
-        }
-      }
-
-      for (const [trackId, track] of tracks.entries()) {
-        if (track.artistId === id) {
-          tracks.set(trackId, { ...track, artistId: null });
-        }
-      }
-
-      return true;
+    if (!artist) {
+      return false;
     }
 
-    return false;
+    await this.trackRepository.update({ artistId: id }, { artistId: null });
+    const favorites = await this.favoritesRepository.find();
+
+    for (const favorite of favorites) {
+      favorite.artists = favorite.artists.filter((artistId) => artistId !== id);
+      await this.favoritesRepository.save(favorite);
+    }
+
+    await this.artistRepository.remove(artist);
+
+    return true;
   }
 }

@@ -1,77 +1,80 @@
-import { Injectable } from '@nestjs/common';
-import { randomUUID } from 'crypto';
+import {
+  Injectable,
+  ForbiddenException,
+  NotFoundException,
+} from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { User } from '../models/entities/user.entity';
 import { UserResponse } from '../models/dto/user.dto';
-import { StorageService } from './storage.service';
 
 @Injectable()
 export class UserService {
-  constructor(private storageService: StorageService) {}
+  constructor(
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
+  ) {}
 
-  getAllUsers(): UserResponse[] {
-    return Array.from(this.storageService.getUsers().values()).map((user) => {
-      const userWithoutPassword = this.getUserWithoutPassword(user);
-      return userWithoutPassword;
-    });
+  async getAllUsers(): Promise<UserResponse[]> {
+    const users = await this.userRepository.find();
+
+    return users.map((user) => this.getUserWithoutPassword(user));
   }
 
-  getUserById(id: string): UserResponse | null {
-    const user = this.storageService.getUsers().get(id);
+  async getUserById(id: string): Promise<UserResponse> {
+    const user = await this.userRepository.findOne({ where: { id } });
 
-    if (user == null) {
-      return null;
+    if (!user) {
+      throw new NotFoundException(`User with id ${id} not found`);
     }
 
-    const userWithoutPassword = this.getUserWithoutPassword(user);
-    return userWithoutPassword;
+    return this.getUserWithoutPassword(user);
   }
 
-  createUser(login: string, password: string): UserResponse {
-    const id = randomUUID();
-    const timestamp = Date.now();
-    const user: User = {
-      id,
+  async createUser(login: string, password: string): Promise<UserResponse> {
+    const user = this.userRepository.create({
       login,
       password,
       version: 1,
-      createdAt: timestamp,
-      updatedAt: timestamp,
-    };
-    this.storageService.getUsers().set(id, user);
-    const userWithoutPassword = this.getUserWithoutPassword(user);
+    });
 
-    return userWithoutPassword;
+    const savedUser = await this.userRepository.save(user);
+
+    return this.getUserWithoutPassword(savedUser);
   }
 
-  updateUserPassword(
+  async updateUserPassword(
     id: string,
     oldPassword: string,
     newPassword: string,
-  ): UserResponse | null | undefined {
-    const user = this.storageService.getUsers().get(id);
+  ): Promise<UserResponse> {
+    const user = await this.userRepository.findOne({ where: { id } });
 
-    if (user === undefined) {
-      return undefined;
+    if (!user) {
+      throw new NotFoundException(`User with id ${id} not found`);
     }
 
     if (user.password !== oldPassword) {
-      return null;
+      throw new ForbiddenException('Old password is incorrect');
     }
 
-    const updatedUser: User = {
-      ...user,
-      password: newPassword,
-      version: user.version + 1,
-      updatedAt: Date.now(),
-    };
-    this.storageService.getUsers().set(id, updatedUser);
-    const userWithoutPassword = this.getUserWithoutPassword(updatedUser);
+    user.password = newPassword;
+    user.version += 1;
+    const updatedUser = await this.userRepository.save(user);
 
-    return userWithoutPassword;
+    return this.getUserWithoutPassword(updatedUser);
   }
 
-  deleteUser(id: string): boolean {
-    return this.storageService.getUsers().delete(id);
+  async deleteUser(id: string): Promise<boolean> {
+    const user = await this.userRepository.findOne({ where: { id } });
+
+    if (!user) {
+      return false;
+    }
+
+    await this.userRepository.remove(user);
+
+    return true;
   }
 
   private getUserWithoutPassword(user: User): UserResponse {
@@ -79,8 +82,14 @@ export class UserService {
       id: user.id,
       login: user.login,
       version: user.version,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
+      createdAt:
+        user.createdAt instanceof Date
+          ? user.createdAt.getTime()
+          : user.createdAt,
+      updatedAt:
+        user.updatedAt instanceof Date
+          ? user.updatedAt.getTime()
+          : user.updatedAt,
     };
   }
 }

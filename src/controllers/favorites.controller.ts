@@ -11,76 +11,106 @@ import {
 } from '@nestjs/common';
 import { FavoritesService } from '../services/favorites.service';
 import { StatusCodes } from 'http-status-codes';
+import { FavoritesResponse } from '../models/dto/favorites.dto';
 
 @Controller('favs')
 export class FavoritesController {
   constructor(private favoritesService: FavoritesService) {}
 
   @Get()
-  getFavorites() {
+  getFavorites(): Promise<FavoritesResponse> {
     return this.favoritesService.getFavorites();
   }
 
   @Post('track/:id')
-  addTrackToFavorites(
+  async addTrackToFavorites(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
   ) {
-    const result = this.favoritesService.addTrackToFavorites(id);
+    try {
+      await this.favoritesService.addTrackToFavorites(id);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw new UnprocessableEntityException('Track does not exist');
+      }
 
-    if (!result) {
-      throw new UnprocessableEntityException('Track does not exist');
+      throw error;
     }
   }
 
   @Delete('track/:id')
   @HttpCode(StatusCodes.NO_CONTENT)
-  deleteTrackFromFavorites(
+  async deleteTrackFromFavorites(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
   ) {
-    if (!this.favoritesService.removeTrackFromFavorites(id)) {
-      throw new NotFoundException('Track is not in favorites');
+    try {
+      await this.favoritesService.removeTrackFromFavorites(id);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw error;
     }
   }
 
   @Post('album/:id')
-  addAlbumToFavorites(
+  async addAlbumToFavorites(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
   ) {
-    const result = this.favoritesService.addAlbumToFavorites(id);
+    try {
+      await this.favoritesService.addAlbumToFavorites(id);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw new UnprocessableEntityException('Album does not exist');
+      }
 
-    if (!result) {
-      throw new UnprocessableEntityException('Album does not exist');
+      throw error;
     }
   }
 
   @Delete('album/:id')
   @HttpCode(StatusCodes.NO_CONTENT)
-  deleteAlbumFromFavorites(
+  async deleteAlbumFromFavorites(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
   ) {
-    if (!this.favoritesService.removeAlbumFromFavorites(id)) {
-      throw new NotFoundException('Album is not in favorites');
+    try {
+      await this.favoritesService.removeAlbumFromFavorites(id);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      throw error;
     }
   }
 
   @Post('artist/:id')
-  addArtistToFavorites(
+  async addArtistToFavorites(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
   ) {
-    const result = this.favoritesService.addArtistToFavorites(id);
+    try {
+      await this.favoritesService.addArtistToFavorites(id);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw new UnprocessableEntityException('Artist does not exist');
+      }
 
-    if (!result) {
-      throw new UnprocessableEntityException('Artist does not exist');
+      throw error;
     }
   }
 
   @Delete('artist/:id')
   @HttpCode(StatusCodes.NO_CONTENT)
-  deleteArtistFromFavorites(
+  async deleteArtistFromFavorites(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
   ) {
-    if (!this.favoritesService.removeArtistFromFavorites(id)) {
-      throw new NotFoundException('Artist is not in favorites');
+    try {
+      await this.favoritesService.removeArtistFromFavorites(id);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      throw error;
     }
   }
 }
