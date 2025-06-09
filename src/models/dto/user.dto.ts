@@ -1,4 +1,4 @@
-import { IsString } from 'class-validator';
+import { IsString, IsUUID, IsInt, IsNumber } from 'class-validator';
 
 export class CreateUserDto {
   @IsString()
@@ -18,10 +18,19 @@ export class UpdatePasswordDto {
 
 export class UpdateUserDto extends CreateUserDto {}
 
-export type UserResponse = {
+export class UserResponse {
+  @IsUUID('4')
   id: string;
+
+  @IsString()
   login: string;
+
+  @IsInt()
   version: number;
+
+  @IsNumber()
   createdAt: number;
+
+  @IsNumber()
   updatedAt: number;
-};
+}
