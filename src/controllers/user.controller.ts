@@ -10,12 +10,15 @@ import {
   NotFoundException,
   ParseUUIDPipe,
   ForbiddenException,
+  UseGuards,
 } from '@nestjs/common';
 import { CreateUserDto, UpdatePasswordDto } from '../models/dto/user.dto';
 import { StatusCodes } from 'http-status-codes';
 import { UserService } from '../services/user.service';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('user')
+@UseGuards(JwtAuthGuard)
 export class UserController {
   constructor(private userService: UserService) {}
 

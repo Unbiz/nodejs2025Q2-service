@@ -6,6 +6,7 @@ import { ArtistModule } from './modules/artist.module';
 import { TrackModule } from './modules/track.module';
 import { UserModule } from './modules/user.module';
 import { FavoritesModule } from './modules/favorites.module';
+import { AuthModule } from './auth/auth.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
@@ -17,6 +18,7 @@ import { AppService } from './app.service';
     TrackModule,
     UserModule,
     FavoritesModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
