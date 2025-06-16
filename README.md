@@ -20,16 +20,22 @@ git clone {repository URL}
 cd nodejs2025Q2-service
 ```
 
-2. Create `.env` file based on `.env.example` and adjust the values if needed.
+2. Copy and configure environment file:
 
-3. Build and start the containers:
+```bash
+copy .env.example .env
+```
+
+3. Edit `.env` file if needed.
+
+4. Build and start the containers:
 
 ```bash
 npm run docker:build   # Build Docker images
 npm run docker:up      # Start containers in detached mode
 ```
 
-4. To stop the application:
+5. To stop the application:
 
 ```bash
 npm run docker:down    # Stop and remove containers
@@ -69,76 +75,42 @@ Features:
 - Database persistence with Docker volumes
 - Custom bridge network for container communication
 
-```
+## API Documentation
 
-## Installing NPM modules
+After starting the application, you can access:
 
-```
+- **Swagger UI**: http://localhost:4000/doc/
+- **API Base URL**: http://localhost:4000/
 
+### Installing NPM modules
+
+```bash
 npm install
-
 ```
-
-## Running application
-
-```
-
-npm start
-
-```
-
-After starting the app on port (4000 as default) you can open
-in your browser OpenAPI documentation by typing http://localhost:4000/doc/.
-For more information about OpenAPI/Swagger please visit https://swagger.io/.
 
 ## Testing
 
-After application running open new terminal and enter:
+The application includes comprehensive test suites for all functionality.
 
-To run all tests without authorization
+### Test Suites Available
 
-```
+#### With Authentication
 
-npm run test
-
-```
-
-To run only one of all test suites
-
-```
-
-npm run test -- <path to suite>
-
-```
-
-To run all test with authorization
-
-```
-
+```bash
 npm run test:auth
-
 ```
 
-To run only specific test suite with authorization
+#### Refresh Token Tests
 
+```bash
+npm run test:refresh
 ```
 
-npm run test:auth -- <path to suite>
+## Development Tools
 
-```
-
-### Auto-fix and format
-
-```
-
-npm run lint
-
-```
-
-```
-
-npm run format
-
+```bash
+npm run lint    # Lint and auto-fix code
+npm run format  # Format code with Prettier
 ```
 
 ### Debugging in VSCode
@@ -146,4 +118,3 @@ npm run format
 Press <kbd>F5</kbd> to debug.
 
 For more information, visit: https://code.visualstudio.com/docs/editor/debugging
-```
