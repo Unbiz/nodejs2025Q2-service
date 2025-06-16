@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import * as bcrypt from 'bcrypt';
 import { User } from '../models/entities/user.entity';
 import { UserResponse } from '../models/dto/user.dto';
 
@@ -32,9 +33,12 @@ export class UserService {
   }
 
   async createUser(login: string, password: string): Promise<UserResponse> {
+    const saltRounds = parseInt(process.env.CRYPT_SALT || '10');
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
     const user = this.userRepository.create({
       login,
-      password,
+      password: hashedPassword,
       version: 1,
     });
 
@@ -54,11 +58,15 @@ export class UserService {
       throw new NotFoundException(`User with id ${id} not found`);
     }
 
-    if (user.password !== oldPassword) {
+    const isOldPasswordValid = await bcrypt.compare(oldPassword, user.password);
+    if (!isOldPasswordValid) {
       throw new ForbiddenException('Old password is incorrect');
     }
 
-    user.password = newPassword;
+    const saltRounds = parseInt(process.env.CRYPT_SALT || '10');
+    const hashedNewPassword = await bcrypt.hash(newPassword, saltRounds);
+
+    user.password = hashedNewPassword;
     user.version += 1;
     const updatedUser = await this.userRepository.save(user);
 
